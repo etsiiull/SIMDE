@@ -1,0 +1,12 @@
+version: "3.8"
+services:
+  front:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: npm start
+    volumes:
+      - "./src:/usr/src/app/src"
+    ports:
+      - 9000:9000
+      - 9060:9060

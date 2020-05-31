@@ -21,6 +21,15 @@ SIMDE is powered by Typescript, React, Redux, Sass and Webpack.
 
 [Go to the project website and start learning](https://etsiiull.github.io/SIMDE/)
 
+## Development
+
+SIMDE is build on top of typescript,sass and webpack. In order to make the build easier a docker file environment has been added.
+Just install docker and docker-compose and type:
+
+`docker-compose up`
+
+All services should be configurated and ready for deployment.
+
 ## Troubling?
 
 If you have any doubt you should check [the official docs](https://etsiiull.gitbooks.io/simde/).

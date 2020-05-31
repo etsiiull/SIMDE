@@ -24,7 +24,8 @@
     "docs:json": "typedoc --mode file --json build/docs/typedoc.json src/index.ts",
     "release": "standard-version",
     "webpack:dev": "webpack-dev-server --config webpack/webpack.dev.js --port=9060",
-    "webpack:prod": "webpack --config webpack/webpack.prod.js"
+    "webpack:prod": "webpack --config webpack/webpack.prod.js",
+    "postinstall": "npm rebuild node-sass"
   },
   "repository": {
     "type": "git",

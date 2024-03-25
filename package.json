@@ -1,6 +1,6 @@
 {
   "name": "simde",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Educational superescalar and VLIW simulator",
   "homepage": "https://github.com/SIMDE-ULL/SIMDE",
   "bugs": {

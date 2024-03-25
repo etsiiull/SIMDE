@@ -1,56 +1,28 @@
-###################
-# BUILD FOR LOCAL DEVELOPMENT
-###################
-FROM node:21-alpine As development
+# syntax=docker/dockerfile:1.7
 
-# Create app directory
-WORKDIR /usr/src/app
+# Nix builder
+FROM nixos/nix:latest AS builder
 
-# Copy application dependency manifests to the container image.
-# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
-# Copying this first prevents re-running npm install on every code change.
-COPY --chown=node:node package*.json ./
+# Copy our source and setup our working dir
+COPY . /tmp/build
+WORKDIR /tmp/build
 
-# Install app dependencies using the `npm ci` command instead of `npm install`
-RUN npm ci
+# Build our Nix environment
+RUN nix \
+    --extra-experimental-features "nix-command flakes" \
+    --option filter-syscalls false \
+    build
 
-# Bundle app source
-COPY --chown=node:node . .
+# Copy the Nix store closure into a directory
+RUN mkdir /tmp/nix-store-closure
+RUN cp -R $(nix-store -qR result/) /tmp/nix-store-closure
 
-# Use the node user from the image (instead of the root user)
-USER node
+# Final image
+FROM scratch
 
-###################
-# BUILD FOR PRODUCTION
-###################
-FROM node:21-alpine As build
+WORKDIR /app
 
-WORKDIR /usr/src/app
-
-COPY --chown=node:node package*.json ./
-
-# In order to run `npm run build` we need access to multiple development dependencies. In the previous development stage we ran `npm ci` which installed all dependencies, so we can copy over the node_modules directory from the development image
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
-
-COPY --chown=node:node . .
-
-# Run the build command which creates the production bundle
-RUN npm run dist
-
-# Set NODE_ENV environment variable
-ENV NODE_ENV production
-
-# Running `npm ci` removes the existing node_modules directory and passing in --only=production ensures that only the production dependencies are installed. This ensures that the node_modules directory is as optimized as possible
-RUN npm ci --only=production && npm cache clean --force
-
-USER node
-
-###################
-# PRODUCTION
-###################
-FROM nginx:1.25.4-alpine As production
-
-# Copy the bundled code from the build stage to the production server image
-# COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY ./docker-nginx.conf /etc/nginx/conf.d/default.conf
-COPY --chown=node:node --from=build /usr/src/app/dist/* /usr/share/nginx/html
+# Copy /nix/store
+COPY --from=builder /tmp/nix-store-closure /nix/store
+COPY --from=builder /tmp/build/result /app
+CMD ["/app/bin/app"]

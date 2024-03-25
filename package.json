@@ -15,6 +15,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc && vite build",
+    "build:pages": "tsc && BASE=\"/SIMDE/\" vite build",
     "check": "biome check --apply ./src",
     "dev": "vite",
     "docs": "typedoc src/index.ts --excludePrivate --mode file --theme minimal --out build/docs",
